@@ -5,22 +5,19 @@ Vue.use(Router)
 
 // route-level code splitting
 const createListView = id => () => System.import('../views/CreateListView').then(m => m.default(id))
+const DemoList = () => () => System.import('../views/DemoList').then(m => m.default())
 const ItemView = () => System.import('../views/ItemView.vue')
-const UserView = () => System.import('../views/UserView.vue')
+const itemList = () => System.import('../views/ItemList.vue')
+// const DemoList = () => System.import('../views/DemoList');
 
 export function createRouter () {
   return new Router({
     mode: 'history',
     scrollBehavior: () => ({ y: 0 }),
     routes: [
-      { path: '/top/:page(\\d+)?', component: createListView('top') },
-      { path: '/new/:page(\\d+)?', component: createListView('new') },
-      { path: '/show/:page(\\d+)?', component: createListView('show') },
-      { path: '/ask/:page(\\d+)?', component: createListView('ask') },
-      { path: '/job/:page(\\d+)?', component: createListView('job') },
-      { path: '/item/:id(\\d+)', component: ItemView },
-      { path: '/user/:id', component: UserView },
-      { path: '/', redirect: '/top' }
+      { path: '/', redirect: '/demos/' },
+      { path: "/demos/:page(\\d+)?", component: itemList},
+      { path: "/demos/tags/:tag([^\\/]+)/:page(\\d+)?", component: itemList},
     ]
   })
 }

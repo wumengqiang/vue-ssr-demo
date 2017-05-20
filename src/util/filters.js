@@ -11,8 +11,12 @@ export function timeAgo (time) {
     return pluralize(~~(between / 60), ' minute')
   } else if (between < 86400) {
     return pluralize(~~(between / 3600), ' hour')
-  } else {
+  } else if(between < 2592000 * 2){
     return pluralize(~~(between / 86400), ' day')
+  } else if(between < 2592000 * 12* 2){
+    return pluralize(~~(between / 2592000), ' month')
+  } else {
+    return pluralize(~~(between / 2592000 / 12), ' year')
   }
 }
 

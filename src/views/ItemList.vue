@@ -1,16 +1,16 @@
 <template>
-  <div class="news-view">
-    <div class="news-list-nav">
+  <div class="demos-view">
+    <div class="demos-list-nav">
       <router-link v-if="page > 1" :to="'/' + type + '/' + (page - 1)">&lt; prev</router-link>
       <a v-else class="disabled">&lt; prev</a>
-      <span>{{ page }}/{{ maxPage }}</span>
+      <span>{{ page }}/{{ demos.maxPage }}</span>
       <router-link v-if="hasMore" :to="'/' + type + '/' + (page + 1)">more &gt;</router-link>
       <a v-else class="disabled">more &gt;</a>
     </div>
     <transition :name="transition">
-      <div class="news-list" :key="displayedPage" v-if="displayedPage > 0">
+      <div class="demos-list" :key="page" v-if="page > 0">
         <transition-group tag="ul" name="item">
-          <item v-for="item in displayedItems" :key="item.id" :item="item">
+          <item v-for="item in demos.data" :key="item.name" :item="item">
           </item>
         </transition-group>
       </div>
@@ -24,6 +24,13 @@ import Item from '../components/Item.vue'
 
 export default {
   name: 'item-list',
+
+  asyncData ({ store,route}) {
+    return store.dispatch('FETCH_DEMO_DATA', 
+      route.params);
+  },
+
+  title: "demo列表",
 
   components: {
     Item
@@ -45,12 +52,11 @@ export default {
     page () {
       return Number(this.$store.state.route.params.page) || 1
     },
-    maxPage () {
-      const { itemsPerPage, lists } = this.$store.state
-      return Math.ceil(lists[this.type].length / itemsPerPage)
+    demos () {
+      return this.$store.state.demos || {};
     },
-    hasMore () {
-      return this.page < this.maxPage
+    hasMore(){
+      return this.demos.page < this.demos.maxPage
     }
   },
 
@@ -58,17 +64,9 @@ export default {
     if (this.$root._isMounted) {
       this.loadItems(this.page)
     }
-    // watch the current list for realtime updates
-    this.unwatchList = watchList(this.type, ids => {
-      this.$store.commit('SET_LIST', { type: this.type, ids })
-      this.$store.dispatch('ENSURE_ACTIVE_ITEMS').then(() => {
-        this.displayedItems = this.$store.getters.activeItems
-      })
-    })
   },
 
   beforeDestroy () {
-    this.unwatchList()
   },
 
   watch: {
@@ -78,21 +76,10 @@ export default {
   },
 
   methods: {
-    loadItems (to = this.page, from = -1) {
-      this.$bar.start()
+    loadItems: function(page){
       this.$store.dispatch('FETCH_LIST_DATA', {
-        type: this.type
-      }).then(() => {
-        if (this.page < 0 || this.page > this.maxPage) {
-          this.$router.replace(`/${this.type}/1`)
-          return
-        }
-        this.transition = from === -1
-          ? null
-          : to > from ? 'slide-left' : 'slide-right'
-        this.displayedPage = to
-        this.displayedItems = this.$store.getters.activeItems
-        this.$bar.finish()
+        page: this.page,
+        tag: this.demos.tag || ""
       })
     }
   }
@@ -100,14 +87,14 @@ export default {
 </script>
 
 <style lang="stylus">
-.news-view
+.demos-view
   padding-top 45px
 
-.news-list-nav, .news-list
+.demos-list-nav, .demos-list
   background-color #fff
   border-radius 2px
 
-.news-list-nav
+.demos-list-nav
   padding 15px 30px
   position fixed
   text-align center
@@ -121,7 +108,7 @@ export default {
   .disabled
     color #ccc
 
-.news-list
+.demos-list
   position absolute
   margin 30px 0
   width 100%
@@ -152,6 +139,6 @@ export default {
   transform translate(30px, 0)
 
 @media (max-width 600px)
-  .news-list
+  .demos-list
     margin 10px 0
 </style>

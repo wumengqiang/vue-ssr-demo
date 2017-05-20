@@ -1,7 +1,8 @@
 import {
   fetchUser,
   fetchItems,
-  fetchIdsByType
+  fetchIdsByType,
+  fetchDemos
 } from '../api'
 
 export default {
@@ -45,5 +46,8 @@ export default {
     return state.users[id]
       ? Promise.resolve(state.users[id])
       : fetchUser(id).then(user => commit('SET_USER', { id, user }))
+  },
+  FETCH_DEMO_DATA: ({ commit, state }, params) => {
+      return fetchDemos(params).then(res => commit('SET_DEMO_LIST', Object.assign({}, res , params)));
   }
 }

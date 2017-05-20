@@ -1,32 +1,21 @@
 <template>
   <li class="news-item">
-    <span class="score">{{ item.score }}</span>
     <span class="title">
-      <template v-if="item.url">
-        <a :href="item.url" target="_blank" rel="noopener">{{ item.title }}</a>
-        <span class="host"> ({{ item.url | host }})</span>
-      </template>
-      <template v-else>
-        <router-link :to="'/item/' + item.id">{{ item.title }}</router-link>
+      <template>
+        <a :href="'/demos/detail/' + item.name">{{ item.title }}</a>
       </template>
     </span>
     <br>
     <span class="meta">
-      <span v-if="item.type !== 'job'" class="by">
-        by <router-link :to="'/user/' + item.by">{{ item.by }}</router-link>
-      </span>
-      <span class="time">
-        {{ item.time | timeAgo }} ago
-      </span>
-      <span v-if="item.type !== 'job'" class="comments-link">
-        | <router-link :to="'/item/' + item.id">{{ item.descendants }} comments</router-link>
-      </span>
+      <span class="time">{{ago}}</span> ago
     </span>
-    <span class="label" v-if="item.type !== 'story'">{{ item.type }}</span>
+    <router-link :key="tag" :to="'/demos/tags/' + tag" span class="tag" v-if="item.tags && item.tags.length" 
+      v-for="tag in item.tags">{{ tag }}</router-link>
   </li>
 </template>
 
 <script>
+import moment from "moment"
 import { timeAgo } from '../util/filters'
 
 export default {
@@ -35,6 +24,11 @@ export default {
   // https://github.com/vuejs/vue/tree/dev/packages/vue-server-renderer#component-caching
   serverCacheKey: ({ item: { id, __lastUpdated, time }}) => {
     return `${id}::${__lastUpdated}::${timeAgo(time)}`
+  },
+  computed: {
+    ago: function(){
+      return this.item.time ? timeAgo(moment(this.item.time).unix()) : '';
+    }
   }
 }
 </script>
@@ -46,6 +40,15 @@ export default {
   border-bottom 1px solid #eee
   position relative
   line-height 20px
+  .tag
+    line-height: 12px;
+    font-size: 12px;
+    display: inline-block;
+    padding: 2px 8px;
+    background: #eee;
+    margin-right: 10px;
+    border-radius: 3px;
+    color: #FF662B;
   .score
     color #ff6600
     font-size 1.1em

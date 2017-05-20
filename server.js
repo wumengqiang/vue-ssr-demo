@@ -64,6 +64,7 @@ app.use('/dist', serve('./dist', true))
 app.use('/public', serve('./public', true))
 app.use('/manifest.json', serve('./manifest.json', true))
 app.use('/service-worker.js', serve('./dist/service-worker.js'))
+app.use("/demos/detail/", serve("./demos/"));
 
 // 1-second microcache.
 // https://www.nginx.com/blog/benefits-of-microcaching-nginx/
@@ -110,6 +111,7 @@ function render (req, res) {
     title: 'Vue HN 2.0', // default title
     url: req.url
   }
+
   renderer.renderToString(context, (err, html) => {
     if (err) {
       return handleError(err)
@@ -124,11 +126,12 @@ function render (req, res) {
   })
 }
 
+
 app.get('*', isProd ? render : (req, res) => {
   readyPromise.then(() => render(req, res))
 })
 
-const port = process.env.PORT || 8080
+const port = process.env.PORT ||  10011
 app.listen(port, () => {
   console.log(`server started at localhost:${port}`)
 })

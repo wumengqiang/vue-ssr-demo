@@ -1,6 +1,6 @@
 // this is aliased in webpack config based on server/client build
 import { createAPI } from 'create-api'
-
+import demos from "../../demos/collect.json"
 const logRequests = !!process.env.DEBUG_API
 
 const api = createAPI({
@@ -73,4 +73,49 @@ export function watchList (type, cb) {
   return () => {
     ref.off('value', handler)
   }
+}
+
+/*
+ * @params obj {
+ *    page: Number, // default 1 
+ *    limit: Number, // default 20 
+ * }
+ * 
+ */ 
+export function fetchDemos(obj){
+  obj = obj || {};
+  if(obj.tag){
+    return fetchDemosByTag(obj);
+  }
+  obj.limit = obj.limit || 20;
+  obj.page = obj.page || 1; // start from 1
+  var maxPage = Math.ceil(demos.infoList.length / obj.limit);
+  var demosIds = demos.infoList.slice((obj.page - 1) * obj.limit, obj.limit);
+  return getDemosById(demosIds || [], maxPage);
+}
+
+/*
+ * @params obj {
+ *    page: Number, // default 1 
+ *    limit: Number, // default 20 
+ *    tag: String, //  default ""
+ * }
+ */ 
+function fetchDemosByTag(obj){
+    obj = obj || {};
+    obj.limit = obj.limit || 20;
+    obj.page = obj.page || 1; // start from 1
+    var demoIds = demos.tagObj[obj.tag] || [],
+      maxPage = Math.ceil(demoIds.length / obj.limit);
+      
+    demoIds = demoIds.slice((obj.page - 1) * obj.limit, obj.limit);
+    console.log(demoIds);
+    return getDemosById(demoIds || [], maxPage);
+}
+
+function getDemosById(idList, maxPage){
+    var res = idList.map(function(item){
+      return demos.infoObj[item] || [];
+    });
+    return Promise.resolve({data: res, maxPage});
 }
